@@ -6,40 +6,10 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
 
-
-
 public final class Constants {
 
-  public static final double MAX_SPEED = 5.450;
-  //swerve modulleri tanımlama matematik:
-  public static final class yukari{
-  //  public static final int solelevator = 70;
-  //  public static final int sagelevator = 71;
-  //  public static final int climbmotor = 72;
-  //  public static final int shooter = 73;
-  //  public static final int shootertaci = 74;
-//--------------------------------------------------
-//ELEVATOR:
-    //pıd değerler(örnek değerler; değişecek)
-    public final static double kP = 0.1; //.068
-    public final static double kI = 0.0;
-    public final static double kD = 0.00; //.005
-
-    public final static double kS = 0.0;
-    public final static double kG = 0.075; //.07
-    public final static double kV = 0.0;
-    public final static double kA = 0.0;
-    
-    public static final double pulleyDiameterMeters = 0.05 ; // 0.05metre
-    public static final double pulleyCircumference = Math.PI * pulleyDiameterMeters;
-    public static final double gearReduction = 6.8;  // Örneğin, 10:1 oran
-    public static final double encoderConversionFactor = pulleyCircumference / gearReduction; 
-    // Bu, motor enkoder sayısını (dönüş) metreye çevirecektir.
-    // Maksimum ve minimum elevator yüksekliği (metre cinsinden)
-    public static final double minHeight = 0.0;
-    public static final double maxHeight = 2.0;  // 2 metre
+ 
   
-  }
   public static final class Swerve {
     
     public static final double stickDeadband = 0.09;
@@ -47,9 +17,9 @@ public final class Constants {
     public static final boolean invertGyro = true; // Always ensure Gyro is CCW+ CW-
 
     /* Drivetrain Constants */
-    public static final double trackWidth = 0.585;
+    public static final double trackWidth = 0.485;
     // Distance between right and left wheels
-    public static final double wheelBase = 0.585;
+    public static final double wheelBase = 0.485;
     // Distance between front and back wheelsxx
     public static final double wheelDiameter = Units.inchesToMeters(3.91);
     public static final double wheelCircumference = wheelDiameter * Math.PI;
@@ -57,7 +27,7 @@ public final class Constants {
     public static final double openLoopRamp = 0.25;
     public static final double closedLoopRamp = 0.0;
 
-    public static final double driveGearRatio = (6.12 / 1.0); // 6.75:1
+    public static final double driveGearRatio = (6.75 / 1.0); // 6.75:1
     public static final double angleGearRatio = (12.8 / 1.0); // 12.8:1
 
     public static final SwerveDriveKinematics swerveKinematics =
@@ -97,7 +67,7 @@ public final class Constants {
     public static final double angleConversionFactor = 360.0 / angleGearRatio;
 
     /* Swerve Profiling Values */
-    public static final double maxSpeed = 6.0; // meters per second
+    public static final double maxSpeed = 5.0; // meters per second
     
     // public static final double maxSpeed = 5880.0 / 60.0 * 0.1633 * 0.1016 *Math.PI; // 5.1 meters per second
     //public static final double maxAngularVelocity = 11.5; 
@@ -117,5 +87,81 @@ public final class Constants {
     public static final double kTranslationVarianceThreshold = 0.1;  // Örneğin, 0.1 metre
     public static final double kAngleVarianceThreshold = 5.0;  
     
+  }
+
+  /* ===================== INTAKE ===================== */
+  public static final class Intake {
+
+    // INTAKE (3 motor)
+    public static final int intakeRoller = 30;
+    public static final int intakeFollower1 = 31;
+    public static final int intakeFollower2 = 32;
+
+
+    public static final IdleMode idleMode = IdleMode.kBrake;
+
+    public static final boolean rollerInverted = false;
+    public static final boolean followerInverted = true;
+
+    public static final double intakeSpeed = 0.9;
+    public static final double outtakeSpeed = -0.8;
+    public static final double holdSpeed = 0.1;
+  }
+
+  /* ===================== SHOOTER ===================== */
+  public static final class Shooter {
+    // SHOOTER (2 motor: flywheel + angle)
+    public static final int shooterFlywheel = 40;
+    public static final int shooterAngle = 41;
+
+    public static final IdleMode flywheelIdleMode = IdleMode.kCoast;
+    public static final IdleMode angleIdleMode = IdleMode.kBrake;
+
+    public static final boolean flywheelInverted = true;
+    public static final boolean angleInverted = false;
+
+    public static final double shootSpeed = 1.0;
+    public static final double idleSpeed = 0.15;
+
+    // Angle PID (ileride kapalı döngü için)
+    public static final double angleKP = 0.015;
+    public static final double angleKI = 0.0;
+    public static final double angleKD = 0.001;
+  }
+
+  /* ===================== FEEDER ===================== */
+  public static final class Feeder {
+    // FEEDER
+    public static final int feederMotor = 50;
+    public static final IdleMode idleMode = IdleMode.kBrake;
+    public static final boolean inverted = false;
+
+    public static final double feedSpeed = 0.7;
+    public static final double reverseSpeed = -0.5;
+  }
+
+  /* ===================== TURRET ===================== */
+  public static final class Turret {
+    public static final int turretMotor = 51;
+    public static final IdleMode idleMode = IdleMode.kBrake;
+    public static final boolean inverted = false;
+
+    public static final double manualSpeed = 0.4;
+  }
+
+  /* ===================== CLIMB ===================== */
+  public static final class Climb {
+
+    public static final int climbLeft = 60;
+    public static final int climbRight = 61;
+
+    public static final IdleMode idleMode = IdleMode.kBrake;
+
+    public static final boolean leftInverted = false;
+    public static final boolean rightInverted = true;
+
+    public static final double climbUpSpeed = 1.0;
+    public static final double climbDownSpeed = -0.8;
+    public static final double holdSpeed = 0.05;
   }
 }

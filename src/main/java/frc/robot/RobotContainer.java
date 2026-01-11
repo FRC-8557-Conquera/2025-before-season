@@ -4,20 +4,8 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Second;
-
-//import static edu.wpi.first.units.Units.Newton;
-
-import java.io.File;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
@@ -26,12 +14,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
-import frc.robot.autos.*;
+
 
 import frc.robot.subsystems.*;
 
@@ -40,7 +24,7 @@ import swervelib.SwerveInputStream;
 public class RobotContainer {
 
     private final Joystick driver = new Joystick(0); 
-    private final Joystick driver2 = new Joystick(1);
+  //  private final Joystick driver2 = new Joystick(1);
  
   
     private final JoystickButton zeroGyro =
@@ -48,7 +32,7 @@ public class RobotContainer {
   
     private final JoystickButton xLock = 
     new JoystickButton(driver, 6);
-  
+  /* 
     private final JoystickButton climb_In = 
     new JoystickButton(driver,7);
   
@@ -82,14 +66,12 @@ public class RobotContainer {
     private final JoystickButton shooter_duzelt = 
     new JoystickButton(driver2 , 10);
 
- 
+ */
   
   
     public final Swerve s_Swerve = new Swerve();
-    public final Peripheral s_yukari = new Peripheral();
-    // 
+    
 
-    public final Vision s_Vision = s_Swerve.vision;
   /* 
     public final climb_in climb_in = new climb_in(s_yukari);
     public final climb_bas climb_bas = new climb_bas(s_yukari); 
@@ -132,9 +114,7 @@ public class RobotContainer {
       configureButtonBindings();
       m_chooser = AutoBuilder.buildAutoChooser();
       SmartDashboard.putData(m_chooser);
-      SmartDashboard.putString("pose", s_Swerve.getPose().toString());
-    
-    
+  
     
     }
  /*
@@ -155,7 +135,6 @@ public class RobotContainer {
   
     private void configureButtonBindings() {
   
-      try {
         /* 
       shooter_duzelt.whileTrue(new elevator_ac(s_yukari, -54, -12, -0.4));
       shooter_duzelt.whileFalse(new RunCommand(() -> s_yukari.elevatorDurdur(), s_yukari));
@@ -191,18 +170,9 @@ public class RobotContainer {
       climb_In.whileTrue(new RunCommand(() -> s_yukari.climbIn(), s_yukari));
       climb_In.whileFalse(new RunCommand(() -> s_yukari.climbDur(), s_yukari));
   */
-      zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
-  
+      zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));  
       xLock.whileTrue(Commands.runOnce((() -> s_Swerve.lock()), s_Swerve).repeatedly());
 
-  
-      Thread.sleep(10);
-       
-       
-    } catch (InterruptedException ex) {
-      Thread.currentThread().interrupt();
-    }
-      
     }
   
   public Command getAutonomousCommand() {

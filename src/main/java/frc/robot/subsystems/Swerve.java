@@ -2,17 +2,16 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import swervelib.SwerveModule;
@@ -20,26 +19,13 @@ import swervelib.SwerveDrive;
 import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
-
 import com.pathplanner.lib.config.RobotConfig;
-
 import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
-import org.photonvision.targeting.PhotonPipelineResult;
-
-import edu.wpi.first.wpilibj.Filesystem;
-import swervelib.SwerveDrive;
-import edu.wpi.first.math.util.Units;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.controllers.PathFollowingController;
 //import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 //import com.pathplanner.lib.util.PIDConstants;
 //import com.pathplanner.lib.util.ReplanningConfig;
@@ -49,19 +35,14 @@ public class Swerve extends SubsystemBase {
   //private SwerveDriveOdometry swerveOdometry;
   private Field2d field;
   public SwerveDrive swerveDrive;
-  private final boolean visionDriveTest = true;
-  public Vision vision;
   private File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
   public Swerve() {
     RobotConfig config;
     SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
-    try {
-      
-      Thread.sleep(1000); // waiting for 1 second for the navx to complete the calibration before resetting the yaw
+    try {      
       config = RobotConfig.fromGUISettings();
       boolean enableFeedforward = true;
       swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(Constants.Swerve.maxSpeed);
-      config = RobotConfig.fromGUISettings();
       //RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyroWithAlliance));
       AutoBuilder.configure(
         this::getPose,
@@ -102,11 +83,7 @@ public class Swerve extends SubsystemBase {
       e.printStackTrace();
       throw new RuntimeException("Failed to initialize RobotConfig", e);
     } 
-    if(visionDriveTest) {
-      setupPhotonVision();
-      swerveDrive.stopOdometryThread();
-    }
-
+  
     field = new Field2d();
     SmartDashboard.putData("Field", field);
     
@@ -114,7 +91,7 @@ public class Swerve extends SubsystemBase {
     swerveDrive.setAngularVelocityCompensation(true, true, 0.1);
     swerveDrive.setModuleStateOptimization(true);
     swerveDrive.setAutoCenteringModules(false);
-    swerveDrive.setHeadingCorrection(false);
+    swerveDrive.setHeadingCorrection(true);
       
   }
 
@@ -131,7 +108,7 @@ public class Swerve extends SubsystemBase {
                                                         scaledInputs.getY(),
                                                         angle.getRadians(),
                                                         getHeading().getRadians(),
-                                                        Constants.MAX_SPEED);
+                                                        Constants.Swerve.maxSpeed);
   }
 
   public void drive(ChassisSpeeds velocity)
@@ -139,41 +116,28 @@ public class Swerve extends SubsystemBase {
     swerveDrive.drive(velocity);
   }
 
-  // public Command aimAtTarget() {
-  //   return run(() -> {
-    
-  //     Optional<PhotonPipelineResult> resultO = Cameras.RAZER.getBestResult();
-  //     if (resultO.isPresent())
-  //     {
-        
-  //       var result = resultO.get();
-  //       if (result.hasTargets())
-  //       {
-  //         drive(getTargetSpeeds(0,
-  //                               0,
-  //                               Rotation2d.fromDegrees(result.getBestTarget()
-  //                                                            .getYaw()))); // Not sure if this will work, more math may be required.
-  //       }
-  //     }
-  //   });
-  // }
 
   public Command driveCommand( DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
      
-        return run(() -> {
-          
-          //Translation2d scaledInputs = SwerveMath.scaleTranslation(new Translation2d(translationX.getAsDouble(), translationY.getAsDouble()), speedRateSwerve);
-        //driveFieldOriented(swerveDrive.swerveController.getTargetSpeeds(scaledInputs.getX(), scaledInputs.getY(), headingX.getAsDouble(), headingY.getAsDouble(), swerveDrive.getOdometryHeading().getRadians(), swerveDrive.getMaximumChassisVelocity()));
-        
-          swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(), translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), angularRotationX.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity(), true, false);
-      
-      });
+       return run(() -> {
+
+  double x = MathUtil.applyDeadband(translationX.getAsDouble(), 0.05);
+  double y = MathUtil.applyDeadband(translationY.getAsDouble(), 0.05);
+  double omega = MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.05);
+
+  swerveDrive.drive(
+      new Translation2d(
+          x * swerveDrive.getMaximumChassisVelocity(),
+          y * swerveDrive.getMaximumChassisVelocity()
+      ),
+      omega * swerveDrive.getMaximumChassisAngularVelocity(),
+      true,
+      false
+  );
+});
 
     }
 
-  public void setupPhotonVision() {
-    vision = new Vision(swerveDrive::getPose, swerveDrive.field);
-  }
   /* Used by SwerveControllerCommand in Auto */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
@@ -268,13 +232,9 @@ public class Swerve extends SubsystemBase {
 
   
   public ChassisSpeeds getChassisSpeeds() {
-    
-    return Constants.Swerve.swerveKinematics.toChassisSpeeds(
-      swerveDrive.getModules()[0].getState(),
-      swerveDrive.getModules()[1].getState(),
-      swerveDrive.getModules()[2].getState(),
-      swerveDrive.getModules()[3].getState());
+  return swerveDrive.getRobotVelocity();
   }
+  
 
   public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
     swerveDrive.drive(chassisSpeeds);
